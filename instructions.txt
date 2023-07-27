@@ -1,0 +1,12 @@
+-------LESSON 1------
+install:
+npm i typeorm
+
+Для створення файлів через terminal
+nest g mo (або co, service) user
+
+-------LESSON 2------
+install:
+npm install --save @nestjs/passport passport passport-local
+npm install --save-dev @types/passport-local
+npm install --save @nestjs/jwt
