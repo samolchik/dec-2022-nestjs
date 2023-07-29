@@ -5,6 +5,7 @@ import {
   IsNumber,
   IsOptional,
   IsString,
+  Matches,
 } from 'class-validator';
 
 export class UserCreateDto {
@@ -25,7 +26,11 @@ export class UserCreateDto {
 
   @ApiProperty()
   @IsString()
+  // @Length()
   @IsNotEmpty()
+  @Matches(/^\S*(?=\S{8,})(?=\S*[A-Z])(?=\S*[\d])\S*$/, {
+    message: 'Password must contain min 8 items and 1 uppercase letter.',
+  })
   password: string;
 
   @ApiProperty()

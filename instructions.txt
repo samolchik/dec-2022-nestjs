@@ -10,3 +10,7 @@ install:
 npm install --save @nestjs/passport passport passport-local
 npm install --save-dev @types/passport-local
 npm install --save @nestjs/jwt
+
+-------LESSON 3------
+install:
+npm i nestjs-typeorm-paginate
