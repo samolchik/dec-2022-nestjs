@@ -2,10 +2,7 @@ import { Injectable } from '@nestjs/common';
 
 @Injectable()
 export class UserService {
-  private users = [
-    // { id: '1', name: 'Olga', age: 23 },
-    // { id: '2', name: 'Egor', age: 3 },
-  ];
+  private users = [];
   constructor() {}
 
   async getAllUsers() {
@@ -17,7 +14,7 @@ export class UserService {
   }
 
   async createUser(data) {
-    const userId = new Date().getMilliseconds();
+    const userId = new Date().getTime();
     const { name, age } = data;
     const newUser = { id: userId, name, age };
     this.users.push(newUser);
