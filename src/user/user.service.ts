@@ -1,36 +1,71 @@
-import { Injectable } from '@nestjs/common';
+import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
+import { Repository } from 'typeorm';
+import { User } from './user.entity';
+import { InjectRepository } from '@nestjs/typeorm';
+import { UserCreateDto } from './dto/user.dto';
+import bcrypt from 'bcrypt';
+import { AuthService } from '../auth/auth.service';
 
 @Injectable()
 export class UserService {
-  private users = [];
-  constructor() {}
+  constructor(
+    @InjectRepository(User)
+    private readonly userRepository: Repository<User>,
+    private readonly authService: AuthService,
+  ) {}
 
-  async getAllUsers() {
-    return this.users;
+  async getAllUsers(): Promise<User[]> {
+    return this.userRepository.find();
   }
 
-  async getUserById(userId: string) {
-    return this.users.find((item) => item.id === userId);
+  async getUserById(userId: string): Promise<User> {
+    return this.userRepository.findOneBy({ id: +userId });
   }
 
-  async createUser(data) {
-    const userId = new Date().getTime();
-    const { name, age } = data;
-    const newUser = { id: userId, name, age };
-    this.users.push(newUser);
-    return newUser;
+  async createUser(data: UserCreateDto) {
+    const user = await this.userRepository.findOne({
+      where: {
+        email: data.email,
+      },
+    });
+
+    if (user) {
+      throw new HttpException(
+        `User with this ${data.email} already exists!`,
+        HttpStatus.BAD_REQUEST,
+      );
+    }
+
+    data.password = await this.getHash(data.password);
+
+    const newUser = this.userRepository.create(data);
+    await this.userRepository.save(newUser);
+
+    const token = await this.signIn(newUser);
+
+    return token;
   }
 
-  async updateUserById(userId: string, data) {
-    const user = this.users.findIndex((item) => item.id === userId);
-    if (user === -1) {
+  async updateUserById(userId: string, data: Partial<User>): Promise<User> {
+    const user = await this.userRepository.findOneBy({ id: +userId });
+    if (!user) {
       return null;
     }
-    this.users[user] = [...this.users[user], ...data];
-    return this.users[user];
+    Object.assign(user, data);
+    return this.userRepository.save(user);
   }
 
-  async deleteUserById(userId: string) {
-    this.users.filter((item) => item.id === userId);
+  async deleteUserById(userId: string): Promise<void> {
+    await this.userRepository.delete(userId);
+  }
+
+  async getHash(password: string) {
+    return await bcrypt.hash(password, 7);
+  }
+
+  async signIn(user) {
+    return await this.authService.signIn({
+      id: user.id.toString(),
+    });
   }
 }

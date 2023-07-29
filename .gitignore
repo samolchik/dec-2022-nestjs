@@ -3,7 +3,9 @@
 /node_modules
 
 #env
-enviroments/.env
+environments/.env
+
+package-lock.json
 
 # Logs
 logs
