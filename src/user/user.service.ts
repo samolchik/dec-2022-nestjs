@@ -55,7 +55,9 @@ export class UserService {
   }
 
   async getUserById(userId: string): Promise<PublicUserData> {
-    const user = await this.userRepository.findOneBy({ id: +userId });
+    const user = await this.userRepository.findOne({
+      where: { id: +userId },
+    });
 
     if (!user) {
       throw new HttpException('User not found', HttpStatus.NOT_FOUND);
@@ -91,20 +93,47 @@ export class UserService {
   async updateUserById(
     userId: string,
     data: UserCreateDto,
-  ): Promise<PublicUserData> {
-    const user = await this.userRepository.findOneBy({ id: +userId });
+  ): Promise<UserCreateDto> {
+    const user = await this.userRepository.findOne({
+      where: { id: +userId },
+    });
+
     if (!user) {
       throw new HttpException('User not found', HttpStatus.NOT_FOUND);
     }
 
-    Object.assign(user, data);
-    await this.userRepository.save(user);
+    if (data.userName !== undefined) {
+      user.userName = data.userName;
+      console.log(data.userName);
+      console.log(user.userName);
+    } else {
+      throw new HttpException(
+        'userName is not defined for the user',
+        HttpStatus.BAD_REQUEST,
+      );
+    }
 
-    return user;
+    if (data.age) {
+      user.age = data.age;
+    }
+
+    if (data.email) {
+      user.email = data.email;
+    }
+
+    if (data.password) {
+      user.password = await this.getHash(data.password);
+    }
+
+    const updateUser = await this.userRepository.save(user);
+
+    return updateUser;
   }
 
   async deleteUserById(userId: string): Promise<void> {
-    const user = await this.userRepository.findOneBy({ id: +userId });
+    const user = await this.userRepository.findOne({
+      where: { id: +userId },
+    });
 
     if (!user) {
       throw new HttpException('User not found', HttpStatus.NOT_FOUND);

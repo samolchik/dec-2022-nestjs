@@ -21,7 +21,7 @@ export class AuthService {
   async validateUser(data: JWTPayload): Promise<User> {
     const user = await this.userRepository.findOne({
       where: {
-        id: Number(data.id),
+        id: +data.id,
       },
     });
     if (!user) {
