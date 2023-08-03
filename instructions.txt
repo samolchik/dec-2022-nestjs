@@ -1,9 +1,14 @@
 -------LESSON 1------
 install:
+npm i -g @nestjs/cli
+nest new project-name
+npm i @nestjs/config
+npm i @nestjs/swagger swagger-ui-express
+npm i class-validator
 npm i typeorm
 
 Для створення файлів через terminal
-nest g mo (або co, service) user
+nest g mo (або co, s - service) user
 
 -------LESSON 2------
 install:
@@ -14,3 +19,7 @@ npm install --save @nestjs/jwt
 -------LESSON 3------
 install:
 npm i nestjs-typeorm-paginate
+
+-------LESSON 4------
+install:
+npm i google-auth-library

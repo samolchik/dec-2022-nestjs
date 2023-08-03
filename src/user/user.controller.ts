@@ -11,7 +11,12 @@ import {
   Req,
   UseGuards,
 } from '@nestjs/common';
-import { ApiExtraModels, ApiResponse, ApiTags } from '@nestjs/swagger';
+import {
+  ApiExtraModels,
+  ApiOperation,
+  ApiResponse,
+  ApiTags,
+} from '@nestjs/swagger';
 import { UserService } from './user.service';
 import { UserCreateDto } from './dto/user.dto';
 import { AuthGuard } from '@nestjs/passport';
@@ -21,13 +26,15 @@ import {
   ApiPaginatedResponse,
   PaginatedDto,
 } from '../common/pagination/response';
+import { UserLoginDto, UserLoginSocialDto } from './dto/user.login.dto';
 
-@ApiTags('User')
+@ApiTags('Users')
 @ApiExtraModels(PublicUserData, PaginatedDto)
 @Controller('user')
 export class UserController {
   constructor(private readonly userService: UserService) {}
 
+  @ApiOperation({ summary: 'Get all users' })
   @UseGuards(AuthGuard())
   @ApiPaginatedResponse('entities', PublicUserData)
   @ApiResponse({
@@ -40,6 +47,7 @@ export class UserController {
     return this.userService.getAllUsers(query);
   }
 
+  @ApiOperation({ summary: 'Get user by id' })
   @ApiResponse({
     status: HttpStatus.OK,
     description: 'Get user by ID',
@@ -51,6 +59,18 @@ export class UserController {
     return this.userService.getUserById(userId);
   }
 
+  @ApiOperation({ summary: 'Login user' })
+  @Post('login')
+  async login(@Req() req: any, @Body() body: UserLoginDto) {
+    return this.userService.login(body);
+  }
+
+  // @Post('social/login')
+  // async loginUserSocial(@Req() req: any, @Body() body: UserLoginSocialDto) {
+  //   return this.userService.loginSocial(body);
+  // }
+
+  @ApiOperation({ summary: 'Create new user' })
   @ApiResponse({
     status: HttpStatus.CREATED,
     description: 'Create new user',
@@ -64,6 +84,7 @@ export class UserController {
     return this.userService.createUser(body);
   }
 
+  @ApiOperation({ summary: 'Update user' })
   @UseGuards(AuthGuard())
   @ApiResponse({
     status: HttpStatus.OK,
@@ -76,6 +97,7 @@ export class UserController {
     return this.userService.updateUserById(userId, data);
   }
 
+  @ApiOperation({ summary: 'Delete user' })
   @UseGuards(AuthGuard())
   @ApiResponse({
     status: HttpStatus.OK,

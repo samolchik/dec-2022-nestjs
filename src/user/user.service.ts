@@ -9,6 +9,9 @@ import { PublicUserInfoDto } from '../common/query/user.query.dto';
 import { paginateRawAndEntities } from 'nestjs-typeorm-paginate';
 import { PublicUserData } from './interface/user.interface';
 import { PaginatedDto } from '../common/pagination/response';
+import { UserLoginDto, UserLoginSocialDto } from './dto/user.login.dto';
+import { OAuth2Client } from 'google-auth-library';
+import * as process from 'process';
 
 @Injectable()
 export class UserService {
@@ -17,6 +20,54 @@ export class UserService {
     private readonly userRepository: Repository<User>,
     private readonly authService: AuthService,
   ) {}
+
+  async login(data: UserLoginDto) {
+    const findUser = await this.userRepository.findOne({
+      where: {
+        email: data.email,
+      },
+    });
+
+    if (!findUser) {
+      throw new HttpException(
+        `Email or password is not correct`,
+        HttpStatus.UNAUTHORIZED,
+      );
+    }
+
+    if (await this.compareHash(data.password, findUser.password)) {
+      const token = await this.signIn(findUser);
+
+      return { token };
+    }
+    throw new HttpException(
+      `Email or password is not correct`,
+      HttpStatus.UNAUTHORIZED,
+    );
+  }
+
+  async loginSocial(data: UserLoginSocialDto) {
+    try {
+      const oAuthClient = new OAuth2Client(
+        process.env.GOOGLE_CLIENT_ID,
+        process.env.GOOGLE_CLIENT_SECRET,
+      );
+
+      const result = await oAuthClient.verifyIdToken({
+        idToken: data.accessToken,
+      });
+
+      console.log(result);
+
+      const tokenPayload = result.getPayload();
+
+      const token = await this.signIn({ id: tokenPayload.sub });
+
+      return { token };
+    } catch (e) {
+      throw new HttpException(`Google auth failed`, HttpStatus.UNAUTHORIZED);
+    }
+  }
 
   async getAllUsers(
     query: PublicUserInfoDto,
@@ -55,25 +106,25 @@ export class UserService {
   }
 
   async getUserById(userId: string): Promise<PublicUserData> {
-    const user = await this.userRepository.findOne({
+    const findUser = await this.userRepository.findOne({
       where: { id: +userId },
     });
 
-    if (!user) {
+    if (!findUser) {
       throw new HttpException('User not found', HttpStatus.NOT_FOUND);
     }
 
-    return user;
+    return findUser;
   }
 
   async createUser(data: UserCreateDto) {
-    const user = await this.userRepository.findOne({
+    const findUser = await this.userRepository.findOne({
       where: {
         email: data.email,
       },
     });
 
-    if (user) {
+    if (findUser) {
       throw new HttpException(
         `User with this ${data.email} already exists!`,
         HttpStatus.BAD_REQUEST,
@@ -94,18 +145,18 @@ export class UserService {
     userId: string,
     data: UserCreateDto,
   ): Promise<UserCreateDto> {
-    const user = await this.userRepository.findOne({
+    const findUser = await this.userRepository.findOne({
       where: { id: +userId },
     });
 
-    if (!user) {
+    if (!findUser) {
       throw new HttpException('User not found', HttpStatus.NOT_FOUND);
     }
 
     if (data.userName !== undefined) {
-      user.userName = data.userName;
+      findUser.userName = data.userName;
       console.log(data.userName);
-      console.log(user.userName);
+      console.log(findUser.userName);
     } else {
       throw new HttpException(
         'userName is not defined for the user',
@@ -114,18 +165,18 @@ export class UserService {
     }
 
     if (data.age) {
-      user.age = data.age;
+      findUser.age = data.age;
     }
 
     if (data.email) {
-      user.email = data.email;
+      findUser.email = data.email;
     }
 
     if (data.password) {
-      user.password = await this.getHash(data.password);
+      findUser.password = await this.getHash(data.password);
     }
 
-    const updateUser = await this.userRepository.save(user);
+    const updateUser = await this.userRepository.save(findUser);
 
     return updateUser;
   }
@@ -150,5 +201,9 @@ export class UserService {
     return await this.authService.signIn({
       id: user.id.toString(),
     });
+  }
+
+  async compareHash(password: string, hash: string): Promise<boolean> {
+    return bcrypt.compare(password, hash);
   }
 }
