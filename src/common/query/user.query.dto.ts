@@ -5,23 +5,19 @@ export class PublicUserInfoDto {
   @ApiProperty()
   @IsString()
   @IsOptional()
-  @IsEnum(['userName', 'age'])
+  @IsEnum(['userName', 'age', 'animalName', 'modelCar', 'brandCar'])
   sort: string;
 
   @ApiProperty()
   @IsString()
   @IsOptional()
-  order: string;
+  @IsEnum(['ASC', 'DESC'])
+  order: 'ASC' | 'DESC';
 
   @ApiProperty()
   @IsString()
   @IsOptional()
   search: string;
-
-  @ApiProperty()
-  @IsString()
-  @IsOptional()
-  status: string;
 
   @ApiProperty()
   @IsString()
@@ -32,4 +28,14 @@ export class PublicUserInfoDto {
   @IsString()
   @IsOptional()
   limit: string;
+
+  @ApiProperty()
+  @IsString()
+  @IsOptional()
+  status: string;
+
+  @ApiProperty()
+  @IsString()
+  @IsOptional()
+  class: string;
 }

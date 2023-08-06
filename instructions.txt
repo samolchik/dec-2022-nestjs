@@ -23,3 +23,10 @@ npm i nestjs-typeorm-paginate
 -------LESSON 4------
 install:
 npm i google-auth-library
+
+-------LESSON 5------
+install:
+npm i cross-var
+npm i cross-env
+npm run migration:generate -name=addManyToManyForUserToCar
+

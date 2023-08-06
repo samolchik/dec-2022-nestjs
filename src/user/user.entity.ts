@@ -1,4 +1,12 @@
-import { Entity, Column, PrimaryGeneratedColumn } from 'typeorm';
+import {
+  Entity,
+  Column,
+  PrimaryGeneratedColumn,
+  OneToMany,
+  ManyToMany,
+} from 'typeorm';
+import { Animal } from '../animal/animal.entity';
+import { Car } from '../car/car.entity';
 
 @Entity()
 export class User {
@@ -19,4 +27,10 @@ export class User {
 
   @Column({ type: 'boolean', default: true })
   isActive: boolean;
+
+  @OneToMany(() => Animal, (entity) => entity.user, { cascade: true })
+  animals: Animal[];
+
+  @ManyToMany(() => Car, (entity) => entity.users)
+  cars: Car[];
 }

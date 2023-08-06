@@ -12,13 +12,13 @@ import {
   UseGuards,
 } from '@nestjs/common';
 import {
+  ApiBearerAuth,
   ApiExtraModels,
   ApiOperation,
   ApiResponse,
   ApiTags,
 } from '@nestjs/swagger';
 import { UserService } from './user.service';
-import { UserCreateDto } from './dto/user.dto';
 import { AuthGuard } from '@nestjs/passport';
 import { PublicUserInfoDto } from '../common/query/user.query.dto';
 import { PublicUserData } from './interface/user.interface';
@@ -27,6 +27,8 @@ import {
   PaginatedDto,
 } from '../common/pagination/response';
 import { UserLoginDto, UserLoginSocialDto } from './dto/user.login.dto';
+import { UpdateUserRequestDto } from './dto/update-user.request.dto';
+import { CreateUserRequestDto } from './dto/create-user.request.dto';
 
 @ApiTags('Users')
 @ApiExtraModels(PublicUserData, PaginatedDto)
@@ -35,6 +37,7 @@ export class UserController {
   constructor(private readonly userService: UserService) {}
 
   @ApiOperation({ summary: 'Get all users' })
+  @ApiBearerAuth()
   @UseGuards(AuthGuard())
   @ApiPaginatedResponse('entities', PublicUserData)
   @ApiResponse({
@@ -43,8 +46,8 @@ export class UserController {
     type: PaginatedDto,
   })
   @Get('list')
-  async getAllUsers(@Query() query: PublicUserInfoDto) {
-    return this.userService.getAllUsers(query);
+  async getUserList(@Query() query: PublicUserInfoDto) {
+    return await this.userService.getAllUsers(query);
   }
 
   @ApiOperation({ summary: 'Get user by id' })
@@ -56,19 +59,19 @@ export class UserController {
   @ApiResponse({ status: HttpStatus.NOT_FOUND, description: 'User not found' })
   @Get(':userId')
   async getUserById(@Param('userId') userId: string) {
-    return this.userService.getUserById(userId);
+    return await this.userService.getUserById(userId);
   }
 
   @ApiOperation({ summary: 'Login user' })
   @Post('login')
   async login(@Req() req: any, @Body() body: UserLoginDto) {
-    return this.userService.login(body);
+    return await this.userService.login(body);
   }
 
-  // @Post('social/login')
-  // async loginUserSocial(@Req() req: any, @Body() body: UserLoginSocialDto) {
-  //   return this.userService.loginSocial(body);
-  // }
+  @Post('social/login')
+  async loginUserSocial(@Req() req: any, @Body() body: UserLoginSocialDto) {
+    return this.userService.loginSocial(body);
+  }
 
   @ApiOperation({ summary: 'Create new user' })
   @ApiResponse({
@@ -80,8 +83,13 @@ export class UserController {
     description: 'User with this email already exists',
   })
   @Post('create')
-  async createUser(@Req() req: any, @Body() body: UserCreateDto) {
-    return this.userService.createUser(body);
+  async createUser(@Req() req: any, @Body() body: CreateUserRequestDto) {
+    return await this.userService.createUser(body);
+  }
+
+  @Post('create/:userId/car')
+  async addCarToUser() {
+    return 'Add New car to User';
   }
 
   @ApiOperation({ summary: 'Update user' })
@@ -93,8 +101,11 @@ export class UserController {
   })
   @ApiResponse({ status: HttpStatus.NOT_FOUND, description: 'User not found' })
   @Patch(':userId')
-  async updateUser(@Param('userId') userId: string, data: UserCreateDto) {
-    return this.userService.updateUserById(userId, data);
+  async updateUser(
+    @Param('userId') userId: string,
+    @Body() body: UpdateUserRequestDto,
+  ) {
+    return await this.userService.updateUserById(userId, body);
   }
 
   @ApiOperation({ summary: 'Delete user' })

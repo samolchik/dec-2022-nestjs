@@ -1,4 +1,4 @@
-import { ApiOperation, ApiProperty } from '@nestjs/swagger';
+import { ApiProperty } from '@nestjs/swagger';
 import {
   IsBoolean,
   IsNotEmpty,
@@ -8,7 +8,7 @@ import {
   Matches,
 } from 'class-validator';
 
-export class UserCreateDto {
+export class UserBaseRequestDto {
   @ApiProperty({
     title: 'Username',
     pattern: '^[a-zA-Z]\\w{1,19}$',
