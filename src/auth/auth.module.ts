@@ -6,6 +6,7 @@ import { TypeOrmModule } from '@nestjs/typeorm';
 import { User } from '../user/user.entity';
 import { AuthService } from './auth.service';
 import { BearerStrategy } from './bearer.strategy';
+import { RedisModule } from '@webeleon/nestjs-redis';
 
 @Module({
   imports: [
@@ -13,6 +14,9 @@ import { BearerStrategy } from './bearer.strategy';
       defaultStrategy: 'bearer',
       property: 'user',
       session: false,
+    }),
+    RedisModule.forRoot({
+      url: 'redis://localhost:6379',
     }),
     TypeOrmModule.forFeature([User]),
     JwtModule.registerAsync({

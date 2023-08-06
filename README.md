@@ -24,12 +24,16 @@
 
 ## Description
 
-[Nest](https://github.com/nestjs/nest) framework TypeScript starter repository.
+[Nest-courses](https://github.com/samolchik/dec-2022-nestjs) - It's my practise to create REST-API.
 
-## Installation
+## Before running
 
 ```bash
+# install all Node dependencies using:
 $ npm install
+
+# up docker compose container using:
+$ npm run start:db
 ```
 
 ## Running the app
@@ -45,6 +49,23 @@ $ npm run start:dev
 $ npm run start:prod
 ```
 
+## Migrations
+
+```bash
+
+# to apply on un-applied migrations to your database, use the command:
+$ npm run migration:run
+
+# to revert previously applied migration, use the command:
+$ npm run migration:revert
+
+# to create new empty migration, use the command:
+$ npm run migration:create -name=MIGRATION-NAME
+
+# to generate new migration based on the changes you've made, use the command:
+$ npm run migration:generate -name=MIGRATION-NAME
+```
+
 ## Test
 
 ```bash
@@ -58,16 +79,4 @@ $ npm run test:e2e
 $ npm run test:cov
 ```
 
-## Support
 
-Nest is an MIT-licensed open source project. It can grow thanks to the sponsors and support by the amazing backers. If you'd like to join them, please [read more here](https://docs.nestjs.com/support).
-
-## Stay in touch
-
-- Author - [Kamil Myśliwiec](https://kamilmysliwiec.com)
-- Website - [https://nestjs.com](https://nestjs.com/)
-- Twitter - [@nestframework](https://twitter.com/nestframework)
-
-## License
-
-Nest is [MIT licensed](LICENSE).

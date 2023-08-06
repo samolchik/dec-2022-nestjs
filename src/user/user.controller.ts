@@ -9,6 +9,7 @@ import {
   Post,
   Query,
   Req,
+  Res,
   UseGuards,
 } from '@nestjs/common';
 import {
@@ -29,6 +30,7 @@ import {
 import { UserLoginDto, UserLoginSocialDto } from './dto/user.login.dto';
 import { UpdateUserRequestDto } from './dto/update-user.request.dto';
 import { CreateUserRequestDto } from './dto/create-user.request.dto';
+import { LogoutGuard } from "../common/guards/logout.guard";
 
 @ApiTags('Users')
 @ApiExtraModels(PublicUserData, PaginatedDto)
@@ -71,6 +73,12 @@ export class UserController {
   @Post('social/login')
   async loginUserSocial(@Req() req: any, @Body() body: UserLoginSocialDto) {
     return this.userService.loginSocial(body);
+  }
+
+  @UseGuards(AuthGuard(), LogoutGuard)
+  @Post('logout')
+  async logout(@Res() res: any) {
+    return res.status(HttpStatus.OK).json('User logout');
   }
 
   @ApiOperation({ summary: 'Create new user' })

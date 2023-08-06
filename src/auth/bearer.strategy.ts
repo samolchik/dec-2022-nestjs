@@ -6,12 +6,14 @@ import { ExtractJwt } from 'passport-jwt';
 
 import { User } from '../user/user.entity';
 import { AuthService } from './auth.service';
+import { InjectRedisClient, RedisClient } from '@webeleon/nestjs-redis';
 
 @Injectable()
 export class BearerStrategy extends PassportStrategy(Strategy, 'bearer') {
   constructor(
     private readonly jwtService: JwtService,
     private readonly authService: AuthService,
+    @InjectRedisClient() readonly redisClient: RedisClient,
   ) {
     super({
       jwtFromRequest: ExtractJwt.fromAuthHeaderAsBearerToken(),
@@ -22,6 +24,10 @@ export class BearerStrategy extends PassportStrategy(Strategy, 'bearer') {
   async validate(token: string): Promise<User> {
     let user = null;
     try {
+      if (!(await this.redisClient.exists(token))) {
+        throw new UnauthorizedException();
+      }
+
       await this.jwtService.verifyAsync(token);
       const decodeToken: any = this.jwtService.decode(token);
       user = await this.authService.validateUser(decodeToken);

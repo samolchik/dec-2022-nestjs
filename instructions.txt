@@ -30,3 +30,7 @@ npm i cross-var
 npm i cross-env
 npm run migration:generate -name=addManyToManyForUserToCar
 
+-------LESSON 6------
+install:
+npm i @webeleon/nestjs-redis
+

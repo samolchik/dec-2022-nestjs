@@ -13,12 +13,14 @@ import * as process from 'process';
 import { UpdateUserRequestDto } from './dto/update-user.request.dto';
 import { CreateUserRequestDto } from './dto/create-user.request.dto';
 import { UserRepository } from './user.repository';
+import { InjectRedisClient, RedisClient } from '@webeleon/nestjs-redis';
 
 @Injectable()
 export class UserService {
   constructor(
     private readonly userRepository: UserRepository,
     private readonly authService: AuthService,
+    @InjectRedisClient() readonly redisClient: RedisClient,
   ) {}
 
   async getAllUsers(
@@ -43,6 +45,7 @@ export class UserService {
 
     if (await this.compareHash(data.password, findUser.password)) {
       const token = await this.signIn(findUser);
+      this.redisClient.setEx(token, 10000, token);
 
       return { token };
     }
